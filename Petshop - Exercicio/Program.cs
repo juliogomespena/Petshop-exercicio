@@ -296,7 +296,7 @@ internal class Program
 
                         if (tutorEncontrado != null)
                         {
-                            if(tutorEncontrado.Pets.Any(p => p.Nome.ToUpper() == nome.ToUpper() && p.Especie.ToUpper() == especie.ToUpper()))
+                            if (tutorEncontrado.Pets.Any(p => p.Nome.ToUpper() == nome.ToUpper() && p.Especie.ToUpper() == especie.ToUpper()))
                             {
                                 Console.WriteLine("Pet já cadastrado para esse tutor.");
                                 break;
@@ -307,7 +307,18 @@ internal class Program
                             Console.WriteLine("Pet cadastrado com sucesso!");
                         }
                         else
-                            Console.WriteLine("Tutor não encontrado. Tem certeza que está cadastrado?");
+                        {
+                            Console.WriteLine("Tutor não encontrado. Deseja cadastrar novo tutor?");
+                            string opcao = ChecarInputString(Console.ReadLine()!);
+
+                            if(opcao.ToUpper() == "SIM" || opcao.ToUpper() == "S")
+                            {
+                                CadastrarTutor();
+                                Console.Clear();
+                                ExibirTitulo("Cadastro de pet");
+                                Console.WriteLine();
+                            }
+                        }
                     }
                     break;
                 }
