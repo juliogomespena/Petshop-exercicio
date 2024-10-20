@@ -54,7 +54,7 @@ internal class Program
             Console.WriteLine("6 - Exibir pets cadastrados");
             Console.WriteLine("0 - Sair");
             Console.Write("\nDigite o menu desejado: ");
-            string opcao = ChecarInputString(Console.ReadLine()!);
+            string opcao = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
             switch (opcao)
             {
@@ -64,13 +64,13 @@ internal class Program
                         Console.Clear();
                         ExibirTitulo("Consultas");
                         Console.WriteLine("\nDeseja marcar ou desmarcar uma consulta?");
-                        opcao = ChecarInputString(Console.ReadLine()!);
-                        if (opcao.ToUpper() == "MARCAR")
+                        opcao = StringCheck.NullOrEmpty(Console.ReadLine()!);
+                        if (StringCheck.IsSimilar(opcao, "marcar"))
                         {
                             MarcarConsulta();
                             break;
                         }
-                        else if (opcao.ToUpper() == "DESMARCAR")
+                        else if (StringCheck.IsSimilar(opcao, "desmarcar"))
                         {
                             DesmarcarConsuta();
                             break;
@@ -132,50 +132,87 @@ internal class Program
             while (!petLocalizado)
             {
                 Console.Write("Para qual pet é a consulta: ");
-                string pet = ChecarInputString(Console.ReadLine()!);
+                string pet = StringCheck.NullOrEmpty(Console.ReadLine()!);
+                Console.Write("Nome do tutor: ");
+                string tutor = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
-                Pet petEncontrado = petsCadastrados.Find(p => p.Nome.ToUpper() == pet.ToUpper());
+                Pet petEncontrado = petsCadastrados.Find(p => StringCheck.IsSimilar(p.Nome, pet) && StringCheck.IsSimilar(p.Tutor.Nome, tutor));
 
                 if (petEncontrado != null)
                 {
-                    Console.WriteLine("Pet localizado!\n");
-                    petLocalizado = true;
+                    Console.WriteLine($"Pet: {petEncontrado.Nome} - Tutor: {petEncontrado.Tutor.Nome}\n");
+                    Console.WriteLine("Pet encontrado é o correto?");
+                    string opcao = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
-                    bool veterinarioLocalizado = false;
-                    while(!veterinarioLocalizado)
+                    if (StringCheck.IsSimilar(opcao, "sim"))
                     {
-                        Console.Write("Qual veterinário fará a consulta: ");
-                        string veterinario = ChecarInputString(Console.ReadLine()!);
+                        petLocalizado = true;
 
-                        Veterinario vetEncontrado = veterinariosCadastrados.Find(v => v.Nome.ToUpper() == veterinario.ToUpper());
-
-                        if(vetEncontrado != null)
+                        bool veterinarioLocalizado = false;
+                        while (!veterinarioLocalizado)
                         {
-                            Console.WriteLine("Veterinário localizado!\n");
-                            veterinarioLocalizado = true;
+                            Console.Write("\nQual veterinário fará a consulta: ");
+                            string veterinario = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
-                            Console.Write("Digite a data da consulta (formato xx/xx/xx): ");
-                            DateTime Data = DateTime.Parse(ChecarInputString(Console.ReadLine()!));
+                            Veterinario vetEncontrado = veterinariosCadastrados.Find(v => StringCheck.IsSimilar(v.Nome, veterinario));
 
-                            Console.Write("Digite a hora da consulta (formato xx:xx): ");
-                            TimeSpan Hora = TimeSpan.Parse(ChecarInputString(Console.ReadLine()!));
+                            if (vetEncontrado != null)
+                            {
+                                Console.WriteLine($"\nVeterinário Dr.{vetEncontrado.Nome} é o correto?");
+                                opcao = StringCheck.NullOrEmpty(Console.ReadLine()!);
+                                if (StringCheck.IsSimilar(opcao, "sim"))
+                                {
+                                    veterinarioLocalizado = true;
 
-                            Console.Write("Digite mais informações da consulta: ");
-                            string observacoes = ChecarInputString(Console.ReadLine()!);
- 
-                            agenda.Agendar(new Consulta(petEncontrado, vetEncontrado, Data, Hora, observacoes));
-                            Console.WriteLine("Consulta agendada com sucesso!");
+                                    Console.Write("\nDigite a data da consulta (formato xx/xx/xx): ");
+                                    DateTime Data = DateTime.Parse(StringCheck.NullOrEmpty(Console.ReadLine()!));
+
+                                    Console.Write("Digite a hora da consulta (formato xx:xx): ");
+                                    TimeSpan Hora = TimeSpan.Parse(StringCheck.NullOrEmpty(Console.ReadLine()!));
+
+                                    Console.Write("Digite mais informações da consulta: ");
+                                    string observacoes = StringCheck.NullOrEmpty(Console.ReadLine()!);
+
+                                    agenda.Agendar(new Consulta(petEncontrado, vetEncontrado, Data, Hora, observacoes));
+                                    Console.WriteLine("\nConsulta agendada com sucesso!");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("Veterinário não encontrado. Tem certeza que está cadastrado?");
+                            }
                         }
-                        else 
-                            Console.WriteLine("Veterinário não encontrado. Tem certeza que está cadastrado?");
-                    }
 
-                    break;
+                        break;
+                    }
+                    Console.WriteLine();
                 }
                 else
-                    Console.WriteLine("Pet não encontrado. Tem certeza que está cadastrado?");
-            }
+                {
+                    Console.WriteLine("Pet não encontrado.\n\nPara exibir lista de Pets, digite 'lista'.\nPara cadastrar, digite 'cadastro'.\nPara voltar, digite 'voltar'.\nPara tentar novamente, digite 'tentar'.");
+                    string opcao = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
+                    if (StringCheck.IsSimilar(opcao, "cadastro"))
+                    {
+                        CadastrarPet();
+                        Console.Clear();
+                        ExibirTitulo("Marcar consulta");
+                        Console.WriteLine();
+                    }
+                    else if (StringCheck.IsSimilar(opcao, "voltar"))
+                    {
+                        break;
+                    }
+                    else if(StringCheck.IsSimilar(opcao, "lista"))
+                    {
+                        ExibirPets();
+                        Console.Clear();
+                        ExibirTitulo("Marcar consulta");
+                        Console.WriteLine();
+                    }
+                    Console.WriteLine();
+                }
+            }
             Console.WriteLine("\nPressione qualquer tecla para voltar ao menu.");
             Console.ReadKey();
         }
@@ -190,34 +227,58 @@ internal class Program
             while (!petLocalizado)
             {
                 Console.Write("Para qual pet é a consulta: ");
-                string pet = ChecarInputString(Console.ReadLine()!);
+                string pet = StringCheck.NullOrEmpty(Console.ReadLine()!);
+                Console.Write("Nome do tutor: ");
+                string tutor = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
-                Pet petEncontrado = petsCadastrados.Find(p => p.Nome.ToUpper() == pet.ToUpper());
+                Pet petEncontrado = petsCadastrados.Find(p => StringCheck.IsSimilar(p.Nome, pet) && StringCheck.IsSimilar(p.Tutor.Nome, tutor));
 
                 if (petEncontrado != null)
                 {
-                    Console.WriteLine("Pet localizado!\n");
-                    petLocalizado = true;
+                    Console.WriteLine($"Pet: {petEncontrado.Nome} - Tutor: {petEncontrado.Tutor.Nome}\n");
+                    Console.WriteLine("Pet encontrado é o correto?");
+                    string opcao = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
-                    Console.Write("Digite a data da consulta (formato xx/xx/xx): ");
-                    DateTime Data = DateTime.Parse(ChecarInputString(Console.ReadLine()!));
-
-                    Console.Write("Digite a hora da consulta (formato xx:xx): ");
-                    TimeSpan Hora = TimeSpan.Parse(ChecarInputString(Console.ReadLine()!));
-                    Console.WriteLine(Hora);
-                    
-                    Consulta consulta = agenda.Consultas.Find(c => c.Pet == petEncontrado && c.Data == DateTime.Parse(Data.ToString(@"dd/MM/yy")) && c.Hora == TimeSpan.Parse(Hora.ToString(@"hh\:mm")));
-
-                    if (consulta != null)
+                    if (StringCheck.IsSimilar(opcao, "sim"))
                     {
-                        agenda.Consultas.Remove(consulta);
-                        Console.WriteLine("Consulta desmarcada com sucesso!");
+                        petLocalizado = true;
+
+                        Console.Write("Digite a data da consulta (formato xx/xx/xx): ");
+                        DateTime Data = DateTime.Parse(StringCheck.NullOrEmpty(Console.ReadLine()!));
+
+                        Console.Write("Digite a hora da consulta (formato xx:xx): ");
+                        TimeSpan Hora = TimeSpan.Parse(StringCheck.NullOrEmpty(Console.ReadLine()!));
+
+                        Consulta consulta = agenda.Consultas.Find(c => c.Pet == petEncontrado && c.Data == DateTime.Parse(Data.ToString(@"dd/MM/yy")) && c.Hora == TimeSpan.Parse(Hora.ToString(@"hh\:mm")));
+
+                        if (consulta != null)
+                        {
+                            agenda.Consultas.Remove(consulta);
+                            Console.WriteLine("\nConsulta desmarcada com sucesso!");
+                        }
+                        else
+                            Console.WriteLine("\nConsulta não encontrada. Verifique os dados e tente novamente.");
                     }
-                    else
-                        Console.WriteLine("Consulta não encontrada. Verifique os dados e tente novamente.");
+                    Console.WriteLine();
                 }
                 else
-                    Console.WriteLine("Pet não encontrado. Digite novamente!");
+                {
+                    Console.WriteLine("Pet não encontrado.\n\nPara exibir lista de Pets, digite 'lista'.\nPara voltar, digite 'voltar'.\nPara tentar novamente, digite 'tentar'.");
+                    string opcao = StringCheck.NullOrEmpty(Console.ReadLine()!);
+
+                    if (StringCheck.IsSimilar(opcao, "voltar"))
+                    {
+                        break;
+                    }
+                    else if (StringCheck.IsSimilar(opcao, "lista"))
+                    {
+                        ExibirPets();
+                        Console.Clear();
+                        ExibirTitulo("Marcar consulta");
+                        Console.WriteLine();
+                    }
+                    Console.WriteLine();
+                }
             }
 
             Console.WriteLine("\nPressione qualquer tecla para voltar ao menu.");
@@ -230,10 +291,17 @@ internal class Program
             ExibirTitulo("Agenda de consultas");
             Console.WriteLine();
 
-            foreach (Consulta consulta in agenda.Consultas.OrderBy(c => c.Data))
+            if (agenda.Consultas.Count == 0)
             {
-                Console.WriteLine(consulta.Informacoes);
-                Console.WriteLine();
+                Console.WriteLine("Nenhuma consulta agendada.");
+            }
+            else
+            {
+                foreach (Consulta consulta in agenda.Consultas.OrderBy(c => c.Data))
+                {
+                    Console.WriteLine(consulta.Informacoes);
+                    Console.WriteLine();
+                }
             }
 
             Console.WriteLine("\nPressione qualquer tecla para voltar ao menu.");
@@ -247,13 +315,13 @@ internal class Program
             Console.WriteLine();
 
             Console.Write("Digite o nome do tutor: ");
-            string nome = ChecarInputString(Console.ReadLine()!);
+            string nome = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
             Console.Write("Digite o endereço do tutor: ");
-            string endereco = ChecarInputString(Console.ReadLine()!);
+            string endereco = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
             Console.Write("Digite o telefone do tutor: ");
-            string telefone = ChecarInputString(Console.ReadLine()!);
+            string telefone = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
             tutoresCadastrados.Add(new Tutor(nome, telefone, endereco));
             Console.WriteLine($"\nTutor {nome} cadastrado com sucesso!");
@@ -269,20 +337,20 @@ internal class Program
             Console.WriteLine();
 
             Console.Write("\nDigite o nome do pet: ");
-            string nome = ChecarInputString(Console.ReadLine()!);
+            string nome = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
             while (true)
             {
                 Console.Write("\nDigite a espécie(cachorro/gato) do pet: ");
-                string especie = ChecarInputString(Console.ReadLine()!);
+                string especie = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
-                if (especie.ToUpper() == "CACHORRO" || especie.ToUpper() == "GATO")
+                if (StringCheck.IsSimilar(especie, "cachorro") || StringCheck.IsSimilar(especie, "gato"))
                 {
                     Console.Write("\nDigite a raça do pet: ");
-                    string raca = ChecarInputString(Console.ReadLine()!);
+                    string raca = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
                     Console.Write("\nDigite a idade do pet: ");
-                    string strIdade = ChecarInputString(Console.ReadLine()!);
+                    string strIdade = StringCheck.NullOrEmpty(Console.ReadLine()!);
                     int idade = int.Parse(strIdade);
 
                     bool tutorLocalizado = false;
@@ -290,28 +358,35 @@ internal class Program
                     while (!tutorLocalizado)
                     {
                         Console.Write("\nDigite o nome do tutor: ");
-                        string tutor = ChecarInputString(Console.ReadLine()!);
+                        string tutor = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
-                        Tutor tutorEncontrado = tutoresCadastrados.Find(t => t.Nome.ToUpper() == tutor.ToUpper());
+                        Tutor tutorEncontrado = tutoresCadastrados.Find(t => StringCheck.IsSimilar(t.Nome, tutor));
 
                         if (tutorEncontrado != null)
                         {
-                            if (tutorEncontrado.Pets.Any(p => p.Nome.ToUpper() == nome.ToUpper() && p.Especie.ToUpper() == especie.ToUpper()))
-                            {
-                                Console.WriteLine("Pet já cadastrado para esse tutor.");
-                                break;
-                            }
-                            tutorLocalizado = true;
+                            Console.WriteLine($"Tutor: {tutorEncontrado.Nome}\n");
+                            Console.WriteLine("Tutor encontrado é o correto?");
+                            string opcao = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
-                            petsCadastrados.Add(new Pet(nome, especie, raca, idade, tutorEncontrado));
-                            Console.WriteLine("Pet cadastrado com sucesso!");
+                            if (StringCheck.IsSimilar(opcao, "sim"))
+                            {
+                                if (tutorEncontrado.Pets.Any(p => StringCheck.IsSimilar(p.Nome, nome) && StringCheck.IsSimilar(p.Especie, especie)))
+                                {
+                                    Console.WriteLine("\nPet já cadastrado para esse tutor.");
+                                    break;
+                                }
+                                tutorLocalizado = true;
+
+                                petsCadastrados.Add(new Pet(nome, especie, raca, idade, tutorEncontrado));
+                                Console.WriteLine("\nPet cadastrado com sucesso!");
+                            }
                         }
                         else
                         {
                             Console.WriteLine("Tutor não encontrado. Deseja cadastrar novo tutor?");
-                            string opcao = ChecarInputString(Console.ReadLine()!);
+                            string opcao = StringCheck.NullOrEmpty(Console.ReadLine()!);
 
-                            if(opcao.ToUpper() == "SIM" || opcao.ToUpper() == "S")
+                            if (StringCheck.IsSimilar(opcao, "sim"))
                             {
                                 CadastrarTutor();
                                 Console.Clear();
@@ -360,16 +435,6 @@ internal class Program
 
             Console.WriteLine("\nPressione qualquer tecla para voltar ao menu.");
             Console.ReadKey();
-        }
-
-        string ChecarInputString(string input)
-        {
-            while (string.IsNullOrWhiteSpace(input))
-            {
-                Console.WriteLine("Valor inválido! Digite novamente");
-                input = Console.ReadLine()!;
-            }
-            return input;
         }
     }
 }
