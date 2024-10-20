@@ -1,9 +1,6 @@
 ﻿using FuzzySharp;
-using System.Linq;
-using System;
-using System.Collections.Generic;
 
-namespace PetshopExercicio.Entidades;
+namespace PetshopExercicio.Utility;
 
 internal static class StringCheck
 {
@@ -22,11 +19,9 @@ internal static class StringCheck
 
         int similarity01 = Fuzz.Ratio(str1, str2);
         int similarity02 = Fuzz.Ratio(str1.ToUpper(), str2.ToUpper());
-        int similarity03 = Fuzz.PartialRatio(str1, str2);
-        int similarity04 = Fuzz.PartialRatio(str1.ToUpper(), str2.ToUpper());
-        int similarity = ((int)new[] { similarity01, similarity02, similarity03, similarity04 }.Max());
+        int similarity = Math.Max(similarity01, similarity02);
 
-        if (similarity >= 78)
+        if (similarity >= 82)
         {
             similar = true;
         }
